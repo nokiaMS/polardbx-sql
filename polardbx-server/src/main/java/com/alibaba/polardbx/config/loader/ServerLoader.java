@@ -108,7 +108,8 @@ public final class ServerLoader extends AbstractLifecycle implements Lifecycle {
 
     private Properties loadServerProperty() {
         // 加载 server.properties 的属性
-        String conf = System.getProperty("server.conf", "classpath:server.properties");
+        //String conf = System.getProperty("server.conf", "classpath:server.properties");
+        String conf = "/home/polarx/code/polardbx/build/run/polardbx-sql/conf/server.properties";
         Properties serverProps = new Properties();
         InputStream in = null;
         try {
