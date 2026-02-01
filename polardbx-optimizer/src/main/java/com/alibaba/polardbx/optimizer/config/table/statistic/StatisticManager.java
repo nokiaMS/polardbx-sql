@@ -117,6 +117,7 @@ import static com.alibaba.polardbx.optimizer.view.VirtualViewType.VIRTUAL_STATIS
 import static com.alibaba.polardbx.stats.metric.FeatureStatsItem.HLL_TASK_FAIL;
 import static com.alibaba.polardbx.stats.metric.FeatureStatsItem.HLL_TASK_SUCC;
 
+
 public class StatisticManager extends AbstractLifecycle implements StatisticService, ModuleInfo {
 
     private static final Logger logger = LoggerUtil.statisticsLogger;

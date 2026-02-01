@@ -2282,6 +2282,9 @@ public class ConnectionParams {
         8L,
         false);
 
+    /**
+     * whether to collect statistics for GSI tables
+     */
     public static final BooleanConfigParam GSI_STATISTICS_COLLECTION = new BooleanConfigParam(
         ConnectionProperties.GSI_STATISTICS_COLLECTION,
         false,
