@@ -126,6 +126,11 @@ public class SystemDbHelper {
     /**
      * Identify if one schema being build-in
      */
+    /**
+     * 判断schema是否为系统内置schema
+     * @param schema
+     * @return
+     */
     public static boolean isDBBuildIn(String schema) {
         for (String n : buildInDb) {
             if (n.equalsIgnoreCase(schema)) {

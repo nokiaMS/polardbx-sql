@@ -122,21 +122,40 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
 
     private static final Logger logger = LoggerUtil.statisticsLogger;
 
+    /**
+     * 缓存的统计信息。
+     */
     private final Map<String, Map<String, CacheLine>> statisticCache = new ConcurrentHashMap<>();
 
+    /**
+     * 统计信息数据源。
+     */
     public static StatisticDataSource sds;
     private static ThreadPoolExecutor executor;
 
+    /**
+     * 基数草图（Cardinality Sketch），用于存储列的基数信息。
+     */
     private final Map<String, Long> cardinalitySketch = Maps.newConcurrentMap();
 
     private Map<String, String> correctionsMap = Maps.newConcurrentMap();
 
+    /**
+     * 统计管理器的单例实例。
+     */
     private static StatisticManager sm;
 
+    /**
+     * 构造函数，初始化统计管理器。
+     */
     public StatisticManager() {
         init();
     }
 
+    /**
+     * 获取统计管理器的单例实例。
+     * @return
+     */
     public static StatisticManager getInstance() {
         if (sm == null) {
             sm = new StatisticManager();
@@ -148,6 +167,9 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
         StatisticManager.executor = executor;
     }
 
+    /**
+     * 初始化统计管理器，加载统计数据并设置线程池。
+     */
     @Override
     protected void doInit() {
         // Skip StatisticManager init in mock mode or build in schema
@@ -155,7 +177,9 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
             return;
         }
         long start = System.currentTimeMillis();
+        //把系统表中的统计信息加载到内存中。
         readStatistic(0L);
+
         this.executor = new ThreadPoolExecutor(
             1, 1, 1800, TimeUnit.SECONDS,
             new ArrayBlockingQueue<>(8),
@@ -177,20 +201,34 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
         logger.info("StatisticManager init consuming " + (end - start) / 1000.0 + " seconds");
     }
 
+    /**
+     * 销毁统计管理器，清理缓存和基数草图。
+     */
     @Override
     protected void doDestroy() {
         statisticCache.clear();
         cardinalitySketch.clear();
     }
 
+    /**
+     * 从统计系统表中读取统计数据，加载表和列的统计信息，并更新缓存和基数草图。
+     *
+     * @param sinceTime 自指定时间以来的统计数据
+     */
     private void readStatistic(long sinceTime) {
+        //加载表 table_statistics.
         Collection<SystemTableTableStatistic.Row> tableRowList = getSds().loadAllTableStatistic(sinceTime);
+        //处理没一行数据。
         for (SystemTableTableStatistic.Row row : tableRowList) {
+            //根据schema和tableName获取缓存行。
             StatisticManager.CacheLine cacheLine = getCacheLine(row.getSchema(), row.getTableName(), true);
+            //更新缓存，设置行数。
             cacheLine.setRowCount(row.getRowCount());
+            //更新缓存，设置最后修改时间。
             cacheLine.setLastModifyTime(row.getUnixTime());
         }
 
+        //加载表 column_statistics.
         Collection<SystemTableColumnStatistic.Row> columnRowList = getSds().loadAllColumnStatistic(sinceTime);
         for (SystemTableColumnStatistic.Row row : columnRowList) {
             StatisticManager.CacheLine cacheLine = getCacheLine(row.getSchema(), row.getTableName(), true);
@@ -203,6 +241,8 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
             cacheLine.setExtend(row.getExtendField());
             cacheLine.decodeExtend();
         }
+
+        //加载基数草图。
         cardinalitySketch.putAll(getSds().loadAllCardinality());
         ModuleLogInfo.getInstance()
             .logRecord(
@@ -215,6 +255,9 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
                 LogLevel.NORMAL);
     }
 
+    /**
+     * 重新加载统计数据，清空缓存和基数草图后重新读取数据。
+     */
     public void clearAndReloadData() {
         statisticCache.clear();
         cardinalitySketch.clear();
@@ -248,16 +291,26 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
         return getCacheLine(schema, logicalTableName, false);
     }
 
+    /**
+     * 获取缓存行，如果不存在则创建一个新的缓存行。
+     * @param schema 表的模式名称
+     * @param logicalTableName 逻辑表名称
+     * @param byPassGsi 是否绕过全局二级索引（GSI）
+     * @return 缓存行对象
+     */
     public CacheLine getCacheLine(String schema, String logicalTableName, boolean byPassGsi) {
         if (!byPassGsi) {
             logicalTableName = getSourceTableName(schema, logicalTableName);
         }
+
+        //如果schema是内置schema，那么直接返回一个缓存行对象；
+        //如果schema不是内置，那么检查statisticCache中是否存在对应的schema和逻辑表名称的缓存行，然后返回对应的缓存行。
         String schemaLower = schema.toLowerCase();
         if (SystemDbHelper.isDBBuildIn(schema)) {
             return new CacheLine();
         }
         if (!statisticCache.containsKey(schemaLower)) {
-            statisticCache.put(schemaLower, Maps.newConcurrentMap());
+            statisticCache.put(schemaLower, Maps.newConcurrentMap()); //不存在则返回null。
         }
         CacheLine cacheLine = statisticCache.get(schemaLower).get(logicalTableName.toLowerCase());
         if (cacheLine == null) {
@@ -267,6 +320,12 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
         return cacheLine;
     }
 
+    /**
+     * 获取源表名称，处理全局二级索引（GSI）和列存表的情况。
+     * @param schema 表的模式名称
+     * @param logicalTableName 逻辑表名称
+     * @return 源表名称
+     */
     public static String getSourceTableName(String schema, String logicalTableName) {
         if (schema == null || logicalTableName == null) {
             return logicalTableName;
@@ -295,6 +354,12 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
         return logicalTableName.toLowerCase();
     }
 
+    /**
+     * 如果缓存中不存在表的统计信息，那么添加到统计信息管理器维护的统计信息缓存中。
+     * @param schema
+     * @param logicalTableName
+     * @param cacheLine
+     */
     public void setCacheLine(String schema, String logicalTableName, CacheLine cacheLine) {
         String schemaLower = schema.toLowerCase();
         Map<String, CacheLine> cacheLineMap = statisticCache.get(schemaLower);
@@ -1281,6 +1346,10 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
         }
     }
 
+    /**
+     * 设置统计信息数据源对象。
+     * @return
+     */
     public StatisticDataSource getSds() {
         return sds;
     }
@@ -1473,7 +1542,16 @@ public class StatisticManager extends AbstractLifecycle implements StatisticServ
         }
     }
 
+    /**
+     * 缓存行对象用于存储表的统计信息
+     */
     public static class CacheLine {
+        /**
+         * 此字符串表示偏斜列统计。
+         *      skew_cols 是在数据预处理过程中，用于标识那些‌偏度（Skewness）绝对值大于1‌的数值型特征的列表。这些特征的分布呈现显著的非正态性（偏斜），
+         *      可能会影响某些机器学习模型（如线性回归、逻辑回归等）的性能，因此通常需要进行变换（如对数变换、平方根变换、Yeo-Johnson变换等）来降低偏度，
+         *      使数据更接近正态分布。
+         */
         public static final String SKEW_COLS = "SKEW_COLS";
 
         private long originRowCount = 0;

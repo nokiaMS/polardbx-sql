@@ -69,6 +69,10 @@ public class UpdateStatisticSyncAction implements ISyncAction {
         this.jsonString = jsonString;
     }
 
+    /**
+     * 同步执行方法，将统计信息更新到本地缓存，并刷新计划缓存和重新加载NDV草图。
+     * @return
+     */
     @Override
     public ResultCursor sync() {
         if (jsonString != null && getJsonString() != null) {

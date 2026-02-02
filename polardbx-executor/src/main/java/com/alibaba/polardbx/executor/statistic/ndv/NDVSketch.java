@@ -44,6 +44,10 @@ import static com.alibaba.polardbx.optimizer.config.table.statistic.inf.Statisti
 /**
  * ndv sketch service for one schema
  */
+
+/**
+ * 此类的作用是实现 NDVSketchService 接口，提供对 NDV（近似唯一值计数）草图的管理和操作功能。
+ */
 public class NDVSketch implements NDVSketchService {
     private Map<String, NDVShardSketch> stringNDVShardSketchMap = Maps.newConcurrentMap();
 

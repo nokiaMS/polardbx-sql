@@ -28,6 +28,9 @@ import org.apache.calcite.rex.RexSimplify;
 import org.apache.calcite.rex.RexUtil;
 import org.apache.calcite.rex.RexVisitorImpl;
 
+/**
+ * 抽象类 AbstractSelectivityEstimator 用于估算查询谓词的选择性。
+ */
 public abstract class AbstractSelectivityEstimator extends RexVisitorImpl<Double> {
 
     public final RelMetadataQuery metadataQuery;
@@ -42,6 +45,15 @@ public abstract class AbstractSelectivityEstimator extends RexVisitorImpl<Double
         this.plannerContext = plannerContext;
     }
 
+    /**
+     * 选择率归一化处理：
+     *      选择率为null,则归一化后也为null；
+     *      选择率小于0，则归一化后为0.0；
+     *      选择率大于1，则归一化后为1.0；
+     *      否则选择率不变。
+     * @param selectivity 选择率
+     * @return 归一化后的选择率
+     */
     public static Double normalize(Double selectivity) {
         if (selectivity == null) {
             return null;
@@ -67,6 +79,14 @@ public abstract class AbstractSelectivityEstimator extends RexVisitorImpl<Double
         return plannerContext == null ? null : plannerContext.getExecutionContext();
     }
 
+    /**
+     * 估算谓词的选择性：
+     *      谓词为null，选择率为 1.0;
+     *      谓词恒真，选择率为 1.0;
+     *      谓词恒假，选择率为 0.0;
+     * @param predicate 谓词表达式
+     * @return 选择性值
+     */
     public Double evaluateInside(RexNode predicate) {
         if (predicate == null) {
             return 1.0;

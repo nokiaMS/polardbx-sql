@@ -27,9 +27,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * 此接口定义了与统计数据源交互的方法。
+ */
 public interface StatisticDataSource {
     void init();
 
+    /**
+     * 加载所有表统计信息
+     * @param sinceTime
+     * @return
+     */
     Collection<SystemTableTableStatistic.Row> loadAllTableStatistic(long sinceTime);
 
     Collection<SystemTableColumnStatistic.Row> loadAllColumnStatistic(long sinceTime);

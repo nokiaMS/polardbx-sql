@@ -130,6 +130,12 @@ public class RexSimplify {
    *
    * @param e Expression to simplify
    */
+
+    /**
+     * 表达式简化方法，根据表达式的类型调用相应的简化方法。
+     * @param e
+     * @return
+     */
   public RexNode simplify(RexNode e) {
     switch (e.getKind()) {
     case AND:
@@ -528,6 +534,11 @@ public class RexSimplify {
     return builder.build();
   }
 
+    /**
+     * 简化与操作表达式。
+     * @param e
+     * @return
+     */
   public RexNode simplifyAnd(RexCall e) {
     final List<RexNode> terms = new ArrayList<>();
     final List<RexNode> notTerms = new ArrayList<>();

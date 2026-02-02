@@ -54,6 +54,11 @@ public interface SystemTableTableStatistic {
 
     boolean deleteAll(String schema, Connection conn);
 
+    /**
+     * select all.
+     * @param sinceTime
+     * @return
+     */
     Collection<Row> selectAll(long sinceTime);
 
     void batchReplace(final List<SystemTableTableStatistic.Row> rowList) throws SQLException;

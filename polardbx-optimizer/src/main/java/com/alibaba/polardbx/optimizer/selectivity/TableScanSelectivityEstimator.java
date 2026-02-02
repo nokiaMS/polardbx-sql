@@ -43,6 +43,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * 表扫描算子的选择性估算器
+ */
 public class TableScanSelectivityEstimator extends AbstractSelectivityEstimator {
     private final TableScan tableScan;
     private final Double tableRowCount;
@@ -59,14 +62,30 @@ public class TableScanSelectivityEstimator extends AbstractSelectivityEstimator 
         this.tableMeta = CBOUtil.getTableMeta(tableScan.getTable());
     }
 
+    /**
+     * 评估RexCall节点的选择性
+     * @param call
+     * @return
+     */
     @Override
     public Double visitCall(RexCall call) {
+        /**
+         * 处理OR和NOT操作符
+         */
         if (call.getOperator() == SqlStdOperatorTable.OR) {
+            /**
+             * A or B的选择率计算方式：
+             *      selectivity( A or B ) = selectivity(A) + selectivity(B) - selectivity(A) * selectivity(B)
+             */
             Double selectivityOr =
                 call.getOperands().stream().map(
                     rexNode -> this.evaluate(rexNode)).reduce(0.0, (a, b) -> a + b - a * b);
             return normalize(selectivityOr);
         } else if (call.getOperator() == SqlStdOperatorTable.NOT) {
+            /**
+             * not A的选择率计算方式：
+             *     selectivity( not A ) = 1 - selectivity( A )
+             */
             Double selectivity = this.evaluate(call.getOperands().get(0));
             return normalize((1 - selectivity));
         } else {
@@ -303,6 +322,15 @@ public class TableScanSelectivityEstimator extends AbstractSelectivityEstimator 
         return result;
     }
 
+    /**
+     * 评估单列In谓词的行数
+     * @param tableMeta
+     * @param in
+     * @param rememberSet
+     * @param toRemovePredicateList
+     * @param plannerContext
+     * @return
+     */
     private Long singleColumnAppearInPredicate(TableMeta tableMeta, RexCall in, Set<Integer> rememberSet,
                                                List<Object> toRemovePredicateList, PlannerContext plannerContext) {
         Long inCount = null;

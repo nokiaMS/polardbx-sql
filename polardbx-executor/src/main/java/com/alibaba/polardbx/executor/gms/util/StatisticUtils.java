@@ -402,6 +402,10 @@ public class StatisticUtils {
         return columnSns;
     }
 
+    /**
+     * 此函数用于检查指定的故障点是否启用，如果启用则抛出异常以中断统计作业。
+     * @param fpKey
+     */
     static void checkFailPoint(String fpKey) {
         if (FailPoint.isKeyEnable(fpKey)) {
             throw new TddlRuntimeException(ErrorCode.ERR_STATISTIC_JOB_INTERRUPTED, "FailPoint : " + fpKey);
@@ -1002,6 +1006,12 @@ public class StatisticUtils {
         }
     }
 
+    /**
+     * 检查是否为文件存储表
+     * @param schema
+     * @param logicalTableName
+     * @return
+     */
     public static boolean isFileStore(String schema, String logicalTableName) {
         try {
             TableMeta tm = OptimizerContext.getContext(schema).getLatestSchemaManager().getTable(logicalTableName);

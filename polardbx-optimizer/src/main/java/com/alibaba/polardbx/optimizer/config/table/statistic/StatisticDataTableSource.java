@@ -30,6 +30,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ThreadPoolExecutor;
 
+/**
+ * 此类实现了 StatisticDataSource 接口，提供了与统计数据源交互的具体实现。
+ */
 public class StatisticDataTableSource implements StatisticDataSource {
     private SystemTableTableStatistic systemTableTableStatistic;
 
@@ -59,6 +62,12 @@ public class StatisticDataTableSource implements StatisticDataSource {
         }
     }
 
+    /**
+     * 加载table_statistics表中大于sinceTime的所有记录
+     *
+     * @param sinceTime
+     * @return
+     */
     @Override
     public Collection<SystemTableTableStatistic.Row> loadAllTableStatistic(long sinceTime) {
         return systemTableTableStatistic.selectAll(sinceTime);

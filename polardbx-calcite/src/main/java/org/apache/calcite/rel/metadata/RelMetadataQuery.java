@@ -274,6 +274,11 @@ public class RelMetadataQuery {
    * @return estimated row count, or null if no reliable estimate can be
    * determined
    */
+    /**
+     * 获得行数统计信息
+     * @param rel 关系表达式
+     * @return 估计的行数，如果无法确定可靠的估计，则返回null
+     */
   public Double getRowCount(RelNode rel) {
     for (;;) {
       try {

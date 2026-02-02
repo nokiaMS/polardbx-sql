@@ -16,6 +16,16 @@
 
 package com.alibaba.polardbx.optimizer.config.table.statistic.inf;
 
+/**
+ * 表示统计结果的来源。
+ */
 public enum StatisticResultSource {
-    HLL_SKETCH, CACHE_LINE, HEAVY_HITTER, TOP_N, HISTOGRAM, MULTI, NULL, CORRECTIONS
+    HLL_SKETCH,
+    CACHE_LINE,
+    HEAVY_HITTER,
+    TOP_N,
+    HISTOGRAM,
+    MULTI,
+    NULL,
+    CORRECTIONS
 }

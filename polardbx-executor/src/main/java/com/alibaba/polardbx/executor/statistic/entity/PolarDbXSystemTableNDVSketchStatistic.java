@@ -46,6 +46,10 @@ import static com.alibaba.polardbx.executor.statistic.ndv.HyperLogLogUtil.bitToI
 /**
  * @author fangwu
  */
+
+/**
+ * 此类的作用是实现 SystemTableNDVSketchStatistic 接口，提供对 NDV Sketch 统计信息的持久化操作。
+ */
 public class PolarDbXSystemTableNDVSketchStatistic implements SystemTableNDVSketchStatistic {
 
     private static final Logger logger = LoggerFactory.getLogger(PolarDbXSystemTableNDVSketchStatistic.class);

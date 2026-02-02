@@ -21,11 +21,19 @@ import java.util.Locale;
 /**
  * @author fangwu
  */
+
+/**
+ * 枚举类 Module 用于表示系统中的不同模块。
+ */
 public enum Module {
     SPM, STATISTICS, SCHEDULE_JOB, MODULE_LOG, UNKNOWN, OSS, TRX, OPTIMIZER, COLUMNAR_PRUNE, METRIC;
 
     private ModuleInfo moduleInfo;
 
+    /**
+     * 方法 register(ModuleInfo moduleInfo) 用于注册模块信息。
+     * @param moduleInfo 要注册的模块信息。
+     */
     public void register(ModuleInfo moduleInfo) {
         this.moduleInfo = moduleInfo;
     }

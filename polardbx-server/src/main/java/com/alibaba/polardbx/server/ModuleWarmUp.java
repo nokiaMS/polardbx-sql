@@ -46,13 +46,22 @@ public class ModuleWarmUp {
         /**
          * init statistic manager
          */
+        //初始化统计管理器。
+        //创建系统表统计信息的实例。
         SystemTableTableStatistic systemTableTableStatistic = new PolarDbXSystemTableLogicalTableStatistic();
+        //创建系统表列统计信息的实例。
         SystemTableColumnStatistic systemTableColumnStatistic = new PolarDbXSystemTableColumnStatistic();
+        //创建系统表 NDV Sketch 统计信息的实例。
         SystemTableNDVSketchStatistic systemTableNDVSketchStatistic = new PolarDbXSystemTableNDVSketchStatistic();
+        //创建 NDV Sketch 服务的实例。
         NDVSketchService ndvSketch = new NDVSketch();
+
+        //定义了一个统计数据源 sds。
         StatisticDataSource sds = new StatisticDataTableSource(systemTableTableStatistic, systemTableColumnStatistic,
             systemTableNDVSketchStatistic, ndvSketch);
         StatisticManager.sds = sds;
+
+        //注册统计管理器到模块系统中。
         Module.STATISTICS.register(StatisticManager.getInstance());
 
         PlanManager.baselineSyncController = new BaselineSyncController();

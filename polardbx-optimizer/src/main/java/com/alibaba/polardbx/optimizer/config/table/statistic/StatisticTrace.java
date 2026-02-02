@@ -37,6 +37,10 @@ import static com.alibaba.polardbx.optimizer.utils.ExplainUtils.getTimeStamp;
 /**
  * @author fangwu
  */
+
+/**
+ * 此类用于跟踪和记录统计信息的计算过程，形成一个树状结构，以便于调试和分析统计信息的来源和计算步骤。
+ */
 public class StatisticTrace {
     /**
      * value digest max size

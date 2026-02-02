@@ -150,6 +150,12 @@ public interface RelNode extends RelOptNode, RelHint, Cloneable, RelRelatedId {
    * @return Estimate of the number of rows this relational expression will
    *   return
    */
+
+    /**
+     * 返回此关系表达式的行数的估计值。
+     * @param mq
+     * @return
+     */
   double estimateRowCount(RelMetadataQuery mq);
 
   /**

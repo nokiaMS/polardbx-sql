@@ -39,28 +39,58 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * TopN类的作用是用于统计和管理数据集中出现频率最高的N个元素（Top N）。
+ */
 public class TopN {
+    //logger对象用于记录统计相关的信息
     private static final Logger logger = LoggerUtil.statisticsLogger;
+
     /**
      * middle value
      */
+    /**
+     * valueMap用于存储每个元素及其对应的出现次数。
+     */
     private Map<Object, Long> valueMap;
+
+    /**
+     * is build
+     */
     private boolean build;
 
+    /**
+     * data type
+     */
     private final DataType dataType;
 
+    //值数组、计数数组和前缀计数数组分别用于存储Top N元素的值、出现次数以及前缀和。
     private Object[] valueArr;
     private long[] countArr;
     private long[] prefixCountArr;
     private final double sampleRate;
     private long maxCount;
 
+    /**
+     * 构造函数，初始化TopN对象。
+     * @param dataType   数据类型，用于比较元素大小。
+     * @param double sampleRate采样率，用于调整统计结果。
+     */
     public TopN(DataType dataType, double sampleRate) {
         this.dataType = dataType;
         this.sampleRate = sampleRate;
         valueMap = Maps.newHashMap();
     }
 
+    /**
+     * 构造函数，用于直接创建一个已经构建好的TopN对象。
+     * @param valueArr
+     * @param countArr
+     * @param prefixCountArr
+     * @param dataType
+     * @param sampleRate
+     * @param maxCount
+     */
     public TopN(Object[] valueArr, long[] countArr, long[] prefixCountArr, DataType dataType, double sampleRate,
                 long maxCount) {
         assert valueArr.length == countArr.length;
@@ -73,14 +103,29 @@ public class TopN {
         this.build = true;
     }
 
+    /**
+     * 向TopN对象中添加一个元素，默认出现次数为1。
+     * @param o 要添加的元素。
+     */
     public void offer(Object o) {
         offer(o, 1);
     }
 
+    /**
+     * 向TopN对象中添加一个元素及其出现次数。
+     * @param o     要添加的元素。
+     * @param count 元素的出现次数。
+     */
     public void offer(Object o, long count) {
+        //merge的作用是将新添加的元素及其出现次数与已有的元素进行合并，如果元素已经存在，则将其出现次数累加。
         valueMap.merge(o, count, Long::sum);
     }
 
+    /**
+     * 获取指定元素的出现次数。
+     * @param o
+     * @return
+     */
     public Long get(Object o) {
         if (!build) {
             throw new IllegalStateException("topN not ready yet, need build first");
@@ -93,6 +138,11 @@ public class TopN {
         return (long) (count / sampleRate);
     }
 
+    /**
+     * 使用二分查找算法在valueArr数组中查找指定元素的位置。
+     * @param key 要查找的元素。
+     * @return 如果找到元素，返回其索引；如果未找到，返回插入点的负值减一。
+     */
     private int binarySearch(Object key) {
         int left = 0;
         int right = valueArr.length - 1;
@@ -113,6 +163,14 @@ public class TopN {
         return -right - 1;
     }
 
+    /**
+     * 计算指定范围内元素的总出现次数。
+     * @param lower           范围的下界。
+     * @param lowerInclusive  下界是否包含在范围内。
+     * @param upper           范围的上界。
+     * @param upperInclusive  上界是否包含在范围内。
+     * @return 指定范围内元素的总出现次数。
+     */
     public long rangeCount(Object lower, boolean lowerInclusive, Object upper, boolean upperInclusive) {
         if (valueArr.length == 0) {
             return 0;
@@ -187,6 +245,13 @@ public class TopN {
         return (long) (count / sampleRate);
     }
 
+    /**
+     * 构建TopN对象，选择使用新算法还是默认算法。
+     * @param useNew 是否使用新算法。
+     * @param rows   数据集的总行数。
+     * @param rate   采样率。
+     * @return 如果构建成功，返回true；否则返回false。
+     */
     public synchronized boolean build(boolean useNew, long rows, double rate) {
         if (useNew) {
             int topNSize = InstConfUtil.getInt(ConnectionParams.NEW_TOPN_SIZE);
@@ -206,6 +271,13 @@ public class TopN {
         }
     }
 
+    /**
+     * 构建TopN对象，使用新算法。
+     * @param maxSize       TOPN_SIZE
+     * @param minCount      TOPN_MIN_NUM
+     * @param relevantError whether consider relevant error
+     * @return is ready to serv
+     */
     public boolean buildNew(int maxSize, int minCount, boolean relevantError) {
         if (build) {
             return true;
@@ -260,6 +332,9 @@ public class TopN {
         return true;
     }
 
+    /**
+     * 构建TopN对象，使用默认算法。
+     */
     /**
      * @param n TOPN_SIZE
      * @param min TOPN_MIN_NUM
@@ -323,10 +398,19 @@ public class TopN {
         return true;
     }
 
+    /**
+     * 获取TopN对象中元素的最大出现次数。
+     * @return 最大出现次数。
+     */
     public long getMaxCount() {
         return maxCount;
     }
 
+    /**
+     * 将TopN对象序列化为JSON字符串。
+     * @param topN 要序列化的TopN对象。
+     * @return 序列化后的JSON字符串。
+     */
     // static method
     public static String serializeToJson(TopN topN) {
         if (topN == null) {
@@ -349,6 +433,11 @@ public class TopN {
         return topNJson.toJSONString();
     }
 
+    /**
+     * 从JSON字符串反序列化为TopN对象。
+     * @param json 要反序列化的JSON字符串。
+     * @return 反序列化后的TopN对象。
+     */
     public static TopN deserializeFromJson(String json) {
         if (StringUtils.isEmpty(json) || "null".equalsIgnoreCase(json)) {
             return null;
@@ -390,6 +479,10 @@ public class TopN {
      *
      * @param values An array containing the values to be validated.
      */
+    /**
+     * 验证TopN值数组中的元素，确保它们符合特定的标准。
+     * @param values
+     */
     protected static void validateTopNValues(final Object[] values) {
         // Check if the array is null or empty
         if (values == null || values.length == 0) {
@@ -409,6 +502,10 @@ public class TopN {
 
     /**
      * optimize for reading
+     */
+    /**
+     * 优化TopN对象的读取操作，返回一个字符串表示。
+     * @return 优化后的字符串表示。
      */
     public String manualReading() {
         String type = StatisticUtils.encodeDataType(dataType);
@@ -432,6 +529,10 @@ public class TopN {
 
     /**
      * result fields
+     */
+    /**
+     * 获取TopN对象中的值数组。
+     * @return
      */
     public Object[] getValueArr() {
         return valueArr;

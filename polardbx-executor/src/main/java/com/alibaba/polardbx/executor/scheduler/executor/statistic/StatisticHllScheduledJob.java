@@ -88,6 +88,10 @@ public class StatisticHllScheduledJob extends StatisticScheduleJob {
         return OptimizerAlertType.STATISTIC_SCHEDULE_JOB_HLL_FAIL;
     }
 
+    /**
+     * 此函数执行统计NDV草图的调度任务。
+     * @return
+     */
     @Override
     public boolean doExecute() {
         long scheduleId = executableScheduledJob.getScheduleId();

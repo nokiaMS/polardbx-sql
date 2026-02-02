@@ -68,6 +68,11 @@ public class StatisticUtils {
     public static final int DEFAULT_SAMPLE_SIZE_ = 80000;
     public static final int DATA_MAX_LEN = 128;
 
+    /**
+     * 把参数type转换为DataType，数据类型的字符串表示形式转换为DataType对象
+     * @param type
+     * @return
+     */
     public static DataType decodeDataType(String type) {
         DataType datatype;
         switch (type) {
@@ -112,6 +117,12 @@ public class StatisticUtils {
      * used for statistic
      * if obj convert to null, return -1
      */
+    /**
+     * 把date,time和timestamp类型的数据转换为long类型
+     * @param dataType
+     * @param obj
+     * @return
+     */
     public static long packDateTypeToLong(DataType dataType, Object obj) {
         if (DataTypeUtil.equalsSemantically(DataTypes.TimestampType, dataType) || DataTypeUtil.equalsSemantically(
             DataTypes.DatetimeType, dataType)) {
@@ -127,6 +138,11 @@ public class StatisticUtils {
         throw new IllegalStateException("Unexpected value: " + dataType);
     }
 
+    /**
+     * 把参数dataType转换为字符串表示形式
+     * @param dataType
+     * @return
+     */
     public static String encodeDataType(DataType dataType) {
         String type;
         switch (dataType.getSqlType()) {
@@ -191,6 +207,11 @@ public class StatisticUtils {
         return type;
     }
 
+    /**
+     * 判断是否为二进制或json类型的列
+     * @param columnMeta
+     * @return
+     */
     public static boolean isBinaryOrJsonColumn(ColumnMeta columnMeta) {
         switch (columnMeta.getDataType().getSqlType()) {
         case Types.BIT:
@@ -206,6 +227,11 @@ public class StatisticUtils {
         }
     }
 
+    /**
+     * 判断是否为字符串类型的列
+     * @param columnMeta
+     * @return
+     */
     public static boolean isStringColumn(ColumnMeta columnMeta) {
         switch (columnMeta.getDataType().getSqlType()) {
         case Types.BIT:
@@ -225,6 +251,13 @@ public class StatisticUtils {
         }
     }
 
+    /**
+     * 获取表的所有列的元数据信息
+     * @param onlyAnalyzeColumnWithIndex
+     * @param schemaName
+     * @param logicalTableName
+     * @return
+     */
     public static List<ColumnMeta> getColumnMetas(boolean onlyAnalyzeColumnWithIndex, String schemaName,
                                                   String logicalTableName) {
         TableMeta tableMeta;

@@ -95,6 +95,7 @@ public class AnalyzeTablePhyDdlTask extends BaseDdlTask {
             retUseHll.add(executionContext.getParamManager().getBoolean(ENABLE_HLL) && SchemaMetaUtil
                 .checkSupportHll(schemaName));
 
+            //强制更新列统计信息
             forceAnalyzeColumnsDdl(schemaName, table, retMsg, executionContext);
 
             // refresh plan cache

@@ -153,6 +153,13 @@ public class StatisticSubProcessUtils {
      * collect table rowcount
      * build statistic(rowcount) setting to cache line
      */
+    /**
+     * 统计表的行数
+     * @param schema 表所属的schema
+     * @param logicalTableName 逻辑表名
+     * @param ec 执行上下文
+     * @throws SQLException SQL异常
+     */
     public static void collectRowCount(String schema, String logicalTableName, ExecutionContext ec)
         throws SQLException {
         try {
@@ -309,6 +316,14 @@ public class StatisticSubProcessUtils {
 
     /**
      * persist table and column statistic and update metadb.tables
+     */
+    /**
+     * 持久化统计信息
+     * @param schema 表的schema
+     * @param logicalTableName 逻辑表名
+     * @param withColumnStatistic 是否包含列统计信息
+     * @param ec 执行上下文
+     * @throws SQLException SQL异常
      */
     public static void persistStatistic(String schema, String logicalTableName, boolean withColumnStatistic,
                                         ExecutionContext ec) throws SQLException {

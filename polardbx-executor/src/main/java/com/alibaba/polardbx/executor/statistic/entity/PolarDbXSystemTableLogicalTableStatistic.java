@@ -39,6 +39,10 @@ import java.util.List;
 /**
  * @author dylan
  */
+
+/**
+ * 此类的作用是实现对 PolarDB-X 系统表中逻辑表统计信息的管理和操作。
+ */
 public class PolarDbXSystemTableLogicalTableStatistic implements SystemTableTableStatistic {
 
     private static final Logger logger = LoggerFactory.getLogger(PolarDbXSystemTableLogicalTableStatistic.class);
@@ -175,6 +179,11 @@ public class PolarDbXSystemTableLogicalTableStatistic implements SystemTableTabl
         }
     }
 
+    /**
+     * 查询表 table_statistics 的全部数据。
+     * @param sinceTime
+     * @return
+     */
     @Override
     public Collection<Row> selectAll(long sinceTime) {
         ArrayList<Row> result = new ArrayList<>();

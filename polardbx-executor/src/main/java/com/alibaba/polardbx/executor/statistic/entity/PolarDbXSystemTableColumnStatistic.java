@@ -47,6 +47,10 @@ import java.util.List;
 /**
  * @author dylan
  */
+
+/**
+ * 此类实现了 SystemTableColumnStatistic 接口，提供了与系统表列统计信息交互的具体实现。
+ */
 public class PolarDbXSystemTableColumnStatistic implements SystemTableColumnStatistic {
 
     private static final Logger logger = LoggerFactory.getLogger(PolarDbXSystemTableColumnStatistic.class);

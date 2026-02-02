@@ -73,6 +73,7 @@ public class StatisticFullProcessUtils {
                 schema, logicalTableName, (endNanos - startNanos) / 1_000_000_000D));
 
             /** persist */
+            //持久化统计信息。
             StatisticSubProcessUtils.persistStatistic(schema, logicalTableName, true, ec);
             /** sync other nodes */
             StatisticSubProcessUtils.syncUpdateStatistic(schema, logicalTableName, StatisticManager.getInstance().getCacheLine(schema, logicalTableName), ec);
@@ -98,6 +99,15 @@ public class StatisticFullProcessUtils {
      * @param ec
      * @return
      */
+
+    /**
+     * 此函数用于收集指定表的统计信息，具体步骤包括：
+     * @param schema 数据库名称
+     * @param logicalTableName 表名称
+     * @param enableHll 是否启用HyperLogLog算法进行基数估计
+     * @param ec 执行上下文，包含执行环境的信息
+     * @return 返回一个布尔值，表示统计信息收集是否成功
+     */
     public static boolean collectStatistic(String schema, String logicalTableName, boolean enableHll,
                                            ExecutionContext ec) {
         try {
@@ -109,6 +119,7 @@ public class StatisticFullProcessUtils {
                 return false;
             }
 
+            //统计行数
             StatisticSubProcessUtils.collectRowCount(schema, logicalTableName, ec);
             long endNanos = System.nanoTime();
             StatisticUtils.logger.info(String.format("Collecting row count of %s.%s consumed %.2fs",
@@ -130,6 +141,7 @@ public class StatisticFullProcessUtils {
             }
 
             /** persist */
+            //持久化统计信息。
             StatisticSubProcessUtils.persistStatistic(schema, logicalTableName, true, ec);
             /** sync other nodes */
             StatisticSubProcessUtils.syncUpdateStatistic(schema, logicalTableName, StatisticManager.getInstance().getCacheLine(schema, logicalTableName), ec);
