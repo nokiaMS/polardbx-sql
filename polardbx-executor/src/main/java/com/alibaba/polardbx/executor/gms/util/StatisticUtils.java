@@ -722,6 +722,18 @@ public class StatisticUtils {
         return tmpRow;
     }
 
+    /**
+     * 此函数的功能是基于主键范围进行扫描分析，适用于主键为单列且数据分布较为均匀的场景。通过扫描主键范围内的数据行，并按照指定的采样率和最大采样行数进行随机抽样，来估算数据的统计信息。
+     * @param schema 数据库名称
+     * @param logicalTableName 逻辑表名称
+     * @param columnMetaList 需要分析的列的元数据信息列表
+     * @param sampleRate 采样率，表示从扫描到的行中随机抽取的比例
+     * @param maxSampleRows 最大采样行数，表示在扫描过程中最多抽取的行数
+     * @param rows 用于存储抽取的行数据的列表，出参。
+     * @param phyTableOperation 物理表操作对象，包含了扫描的SQL语句等信息
+     * @param parameterContextMap 参数上下文映射，用于设置SQL语句中的参数
+     * @return 返回一个double值，表示实际抽取的行数占扫描到的行数的比例，即采样率的估算值。
+     */
     public static double scanAnalyzeOnPkRange(String schema, String logicalTableName, List<ColumnMeta> columnMetaList,
                                               float sampleRate, int maxSampleRows, List<Row> rows,
                                               PhyTableOperation phyTableOperation,
@@ -741,20 +753,33 @@ public class StatisticUtils {
                 connection = (Connection) serverConfigManager.getTransConnection(schema);
                 PreparedStatement statement = connection.prepareStatement(hint + phyTableOperation.getNativeSql());
                 ParameterMethod.setParameters(statement, parameterContextMap);
+
+                //获得扫描结果集。
                 resultSet = statement.executeQuery();
                 int rowCount = 0;
                 CursorMeta cursorMeta = CursorMeta.build(columnMetaList);
+                //获得随机数生成器，用于在扫描过程中随机抽取行数据。
                 Random random = new Random();
                 while (resultSet.next()) {
-                    Object[] objects = new Object[columnMetaList.size()];
+                    //此while循环用于遍历扫描结果集中的每一行数据。
+                    //对于每一行数据，首先创建一个Object数组来存储该行的列值。
+                    //然后，通过循环遍历列的索引，从结果集中获取每一列的值，并将其存储在Object数组中。
+                    Object[] objects = new Object[columnMetaList.size()];  //一个objects中填充了一行的所有列。
+                    //解析结果集，把每一列存储到objects中的对应位置。
                     for (int columnIndex = 1; columnIndex <= columnMetaList.size(); columnIndex++) {
                         objects[columnIndex - 1] = resultSet.getObject(columnIndex);
                     }
-                    if (rowCount < maxSampleRows) {
+                    //此if语句用于根据采样率和最大采样行数的限制，随机抽取行数据并存储到rows列表中。
+                    //这是蓄水池采样的核心逻辑：
+                    //如果当前抽取的行数rowCount小于最大采样行数maxSampleRows，则直接将当前行数据添加到rows列表中，并将rowCount加1。
+                    //如果当前抽取的行数rowCount已经达到了最大采样行数
+                    //则通过生成一个随机数来决定是否替换已经抽取的行数据。如果生成的随机数小于maxSampleRows，则用当前行数据替换rows列表中对应索引位置的行数据。
+                    if (rowCount < maxSampleRows) { //样本行未满，那么直接添加扫描到的行到样本数据中。
                         rows.add(new ArrayRow(cursorMeta, objects));
                         rowCount++;
                     } else {
-                        int rowIndex = random.nextInt(maxSampleRows) - 1;
+                        //如果样本行已满，那么以一定的概率替换样本数据中的某一行，保证扫描到的每一行被抽取的概率相同。
+                        int rowIndex = random.nextInt(maxSampleRows) - 1;   //获得行的位置编号，因为采取随即数的方式，那么每个行被抽取的概率相同。概率为maxSampleRows / rowCou
                         rows.set(rowIndex, new ArrayRow(cursorMeta, objects));
                     }
                 }

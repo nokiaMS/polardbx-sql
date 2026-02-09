@@ -1662,6 +1662,11 @@ public class ConnectionParams {
     /**
      * max physcial table sample rows for backfill pk range task
      */
+    /**
+     * 此控制参数的作用是限制在进行物理表回填时，针对主键范围切分的任务，采样的最大行数。
+     * 在回填过程中，系统可能会对主键范围进行切分，以便更高效地处理数据。这个参数的设置可以帮助控制采样的规模，避免过多的行被采样，从而影响性能。
+     * 什么是物理表回填？当进行某些DDL操作（如添加列、修改列类型等）时，系统可能需要对现有数据进行回填，以确保新旧数据的一致性。物理表回填是指直接在物理存储层面进行数据的更新和修改，而不是通过逻辑层面进行处理。
+     */
     public static final LongConfigParam BACKFILL_MAX_SAMPLE_ROWS_FOR_PK_RANGE =
         new LongConfigParam(ConnectionProperties.BACKFILL_MAX_SAMPLE_ROWS_FOR_PK_RANGE,
             10000L, Long.MAX_VALUE, 100000L, false);
