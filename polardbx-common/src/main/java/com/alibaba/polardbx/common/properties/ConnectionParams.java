@@ -2422,9 +2422,16 @@ public class ConnectionParams {
     public static final BooleanConfigParam ENABLE_INNODB_BTREE_SAMPLING = new BooleanConfigParam(
         ConnectionProperties.ENABLE_INNODB_BTREE_SAMPLING, true, true);
 
+    /**
+     * 默认直方图的最大采样数为100000
+     */
     public static final IntConfigParam HISTOGRAM_MAX_SAMPLE_SIZE = new IntConfigParam(
         ConnectionProperties.HISTOGRAM_MAX_SAMPLE_SIZE, 1000, Integer.MAX_VALUE, 100000, true);
 
+    /**
+     * 配置直方图的桶大小。
+     * 最小值：1；最大值：Integer.MAX_VALUE；默认值：64
+     */
     public static final IntConfigParam HISTOGRAM_BUCKET_SIZE = new IntConfigParam(
         ConnectionProperties.HISTOGRAM_BUCKET_SIZE, 1, Integer.MAX_VALUE, 64, true);
 

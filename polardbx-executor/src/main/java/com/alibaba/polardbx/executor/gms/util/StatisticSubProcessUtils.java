@@ -116,6 +116,7 @@ public class StatisticSubProcessUtils {
                 return;
             }
 
+            //样本大小。
             long sampleSize = (int) (sampleRate * rowCount);
             int histogramBucketSize = getHistogramBucketSize(sampleSize);
             int maxSampleSize = InstConfUtil.getInt(ConnectionParams.HISTOGRAM_MAX_SAMPLE_SIZE);

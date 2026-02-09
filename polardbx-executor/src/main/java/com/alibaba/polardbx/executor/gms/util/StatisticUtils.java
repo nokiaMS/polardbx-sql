@@ -1277,7 +1277,13 @@ public class StatisticUtils {
         return sampleRate;
     }
 
+    /**
+     * 计算直方图桶的数量。
+     * @param sampleSize 样本数量
+     * @return 直方图桶的数量
+     */
     public static int getHistogramBucketSize(long sampleSize) {
+        //最小值1，最大值为int.max，默认值为64. 见HISTOGRAM_BUCKET_SIZE的配置信息。
         int histogramBucketSize = InstConfUtil.getInt(ConnectionParams.HISTOGRAM_BUCKET_SIZE);
         if (sampleSize == 0) {
             histogramBucketSize = 1;
